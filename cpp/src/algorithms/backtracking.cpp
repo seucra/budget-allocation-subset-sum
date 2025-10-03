@@ -37,7 +37,7 @@ void bt_helper(const std::vector<int>& costs, int budget, int idx, int current_s
     bt_helper(costs, budget, idx + 1, current_sum, current, state);
 }
 
-Result backtracking_subset_sum(const std::vector<int>& costs, int budget) {
+Result run_backtracking(const std::vector<int>& costs, int budget) {
     auto start = std::chrono::high_resolution_clock::now();
 
     BTState state;

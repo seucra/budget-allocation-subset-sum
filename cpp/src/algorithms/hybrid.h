@@ -3,9 +3,9 @@
 #define HYBRID_H
 
 #include <vector>
-#include "budget_lib.h"
+#include "budget_lib_cpp.h"
 
-Result hybrid_subset_sum(const std::vector<int>& costs, int budget);
+Result run_hybrid(const std::vector<int>& costs, int budget);
 
 #endif // HYBRID_H
 

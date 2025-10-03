@@ -3,7 +3,7 @@
 #include <chrono>
 #include <algorithm>
 
-Result dp_subset_sum(const std::vector<int>& costs, int budget) {
+Result run_dp(const std::vector<int>& costs, int budget) {
     auto start = std::chrono::high_resolution_clock::now();
 
     int n = (int)costs.size();

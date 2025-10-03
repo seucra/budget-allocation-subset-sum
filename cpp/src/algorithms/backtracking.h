@@ -3,9 +3,9 @@
 #define BACKTRACKING_H
 
 #include <vector>
-#include "budget_lib.h"
+#include "budget_lib_cpp.h"
 
-Result backtracking_subset_sum(const std::vector<int>& costs, int budget);
+Result run_backtracking(const std::vector<int>& costs, int budget);
 
 #endif // BACKTRACKING_H
 
