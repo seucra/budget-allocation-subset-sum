@@ -1,11 +1,11 @@
 // frontend/src/pages/SolverPage.tsx
 import React, { useState, useCallback } from 'react';
-import { IProject, IAlgorithmResult, ISolveRequest } from '../types';
-import { runSolver } from '../api/solver'; // <-- Importing the real API service
+import type { IProject, IAlgorithmResult, ISolveRequest } from '../types'; // <-- CRITICAL FIX
 import ProjectInputForm from '../components/input/ProjectInputForm';
 import BudgetControl from '../components/input/BudgetControl';
 import AlgorithmSelector from '../components/input/AlgorithmSelector';
 import ResultCard from '../components/results/ResultCard';
+import { runSolver } from '../api/solver';
 
 // Initial state for demonstration purposes
 const INITIAL_PROJECTS: IProject[] = [
@@ -53,7 +53,7 @@ const SolverPage: React.FC = () => {
       const result = await runSolver(request);
       
       // Since the API returns one result (IAlgorithmRun), we adapt it to IAlgorithmResult array
-      const algorithmResult: IAlgorithmResult = {
+      const AlgorithmResult: IAlgorithmResult= {
         selected_indices: result.selected_indices,
         total_cost: result.total_cost,
         execution_time_ms: result.execution_time_ms,
@@ -62,7 +62,7 @@ const SolverPage: React.FC = () => {
         algorithm_name: result.algorithm_name,
       };
 
-      setResults([algorithmResult]); // Display the single result
+      setResults([AlgorithmResult]); // Display the single result
       
     } catch (error: any) {
       // Robust Error Handling for C++ algorithm latency and validation errors

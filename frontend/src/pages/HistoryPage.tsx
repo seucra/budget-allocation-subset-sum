@@ -1,7 +1,6 @@
 // frontend/src/pages/HistoryPage.tsx
 import React, { useState, useEffect } from 'react';
-import { IAlgorithmRun } from '../types';
-
+import type {  IAlgorithmRun } from '../types'; 
 // --- MOCK API DATA AND FUNCTION ---
 // In a real application, this would be an Axios call to GET /results/{run_id}/ or a list endpoint.
 
