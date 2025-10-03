@@ -1,80 +1,85 @@
 // frontend/src/pages/SolverPage.tsx
-import React, { useState } from 'react';
-import { IProject, IAlgorithmResult } from '../types';
+import React, { useState, useCallback } from 'react';
+import { IProject, IAlgorithmResult, ISolveRequest } from '../types';
+import { runSolver } from '../api/solver'; // <-- Importing the real API service
 import ProjectInputForm from '../components/input/ProjectInputForm';
+import BudgetControl from '../components/input/BudgetControl';
 import AlgorithmSelector from '../components/input/AlgorithmSelector';
 import ResultCard from '../components/results/ResultCard';
 
-// Mock API Call (Replace with actual Axios call later)
-const mockSolveAPI = (projects: IProject[], budget: number, algorithm: string): Promise<IAlgorithmResult> => {
-  return new Promise((resolve) => {
-    const isDP = algorithm === 'Dynamic Programming';
-    const isGreedy = algorithm === 'Greedy Heuristic';
-    const isFailed = projects.length === 0 && budget === 0;
-
-    // Simulate backend processing time (latency management is key here)
-    setTimeout(() => {
-      if (isFailed) {
-        resolve({
-          selected_indices: [],
-          total_cost: 0,
-          execution_time_ms: 10,
-          memory_used_mb: 0.1,
-          status: 'failed',
-          algorithm_name: algorithm
-        });
-        return;
-      }
-
-      // Simulate a result structure for the given budget/projects
-      const totalCost = Math.min(budget, 290);
-      const indices = [0, 1, 3]; // Dummy indices for a result
-      
-      resolve({
-        selected_indices: indices,
-        total_cost: totalCost,
-        execution_time_ms: isDP ? 50.123 : isGreedy ? 0.87 : 100.5,
-        memory_used_mb: isDP ? 10.5 : isGreedy ? 0.01 : 1.2,
-        status: isDP ? 'exact' : 'approximate',
-        algorithm_name: algorithm
-      });
-    }, 1500); // 1.5 second delay
-  });
-};
+// Initial state for demonstration purposes
+const INITIAL_PROJECTS: IProject[] = [
+  { id: '1', name: 'Project Alpha', cost: 120 },
+  { id: '2', name: 'Project Beta', cost: 80 },
+  { id: '3', name: 'Project Gamma', cost: 150 },
+  { id: '4', name: 'Project Delta', cost: 40 },
+];
+const INITIAL_BUDGET = 300;
 
 const SolverPage: React.FC = () => {
   // --- State Management ---
-  const [projects, setProjects] = useState<IProject[]>([
-    { id: '1', name: 'Project Alpha', cost: 120 },
-    { id: '2', name: 'Project Beta', cost: 80 },
-    { id: '3', name: 'Project Gamma', cost: 150 },
-    { id: '4', name: 'Project Delta', cost: 40 },
-  ]);
-  const [budget, setBudget] = useState<number>(300);
+  const [projects, setProjects] = useState<IProject[]>(INITIAL_PROJECTS);
+  const [budget, setBudget] = useState<number>(INITIAL_BUDGET);
   const [selectedAlgorithm, setSelectedAlgorithm] = useState<string>('Dynamic Programming');
   const [results, setResults] = useState<IAlgorithmResult[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [backendValidationErrors, setBackendValidationErrors] = useState<any>(null);
 
-  // --- Core Logic ---
-  const handleSolve = async () => {
-    if (projects.length === 0) return alert("Please add projects first.");
+
+  // --- Core Logic: Handling API Call ---
+  const handleSolve = useCallback(async () => {
+    setApiError(null);
+    setBackendValidationErrors(null);
+
+    if (projects.length === 0) {
+      setApiError("Please add projects to the dataset before running the solver.");
+      return;
+    }
 
     setIsLoading(true);
-    setResults([]); // Clear previous results before running
+    setResults([]); // Clear previous results
 
-    // In a production app, you would iterate over a list of algorithms 
-    // to run side-by-side, but here we run only the selected one for simplicity.
+    // Prepare the request body (aligning with ISolveRequest)
+    const request: ISolveRequest = {
+      projects: projects,
+      budget: budget,
+      // Pass the selected algorithm, or undefined if 'Auto-Select' is chosen
+      algorithm: selectedAlgorithm === 'Auto-Select (Smart Solver)' ? undefined : selectedAlgorithm,
+    };
+
     try {
-      // API call to POST /solve/
-      const result = await mockSolveAPI(projects, budget, selectedAlgorithm);
-      setResults([result]); // Display the single result
-    } catch (error) {
-      console.error("Solver error:", error);
-      // Implement robust error handling for API failures/timeouts.
+      // Execute the API call (POST /solve/)
+      const result = await runSolver(request);
+      
+      // Since the API returns one result (IAlgorithmRun), we adapt it to IAlgorithmResult array
+      const algorithmResult: IAlgorithmResult = {
+        selected_indices: result.selected_indices,
+        total_cost: result.total_cost,
+        execution_time_ms: result.execution_time_ms,
+        memory_used_mb: result.memory_used_mb,
+        status: result.status,
+        algorithm_name: result.algorithm_name,
+      };
+
+      setResults([algorithmResult]); // Display the single result
+      
+    } catch (error: any) {
+      // Robust Error Handling for C++ algorithm latency and validation errors
+      
+      // Check for structured validation errors (e.g., Pydantic errors from FastAPI)
+      if (error.message.includes("API Error:") && error.message.includes("{")) {
+          // Attempt to parse validation details if the API returned structured JSON errors
+          setBackendValidationErrors(JSON.parse(error.message.split("API Error: ")[1]));
+          setApiError("Validation Failed. Check input fields for specific errors.");
+      } else {
+          setApiError(error.message || "An unknown error occurred during computation.");
+      }
+      
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [projects, budget, selectedAlgorithm]); // Depend on state for memoization
 
   return (
     <div className="container mx-auto p-6">
@@ -90,7 +95,7 @@ const SolverPage: React.FC = () => {
           <ProjectInputForm 
             projects={projects} 
             setProjects={setProjects} 
-            backendErrors={null} 
+            backendErrors={backendValidationErrors} 
           />
           
           <AlgorithmSelector
@@ -105,6 +110,14 @@ const SolverPage: React.FC = () => {
         <div className="lg:col-span-2 space-y-6 p-4 border rounded-lg bg-white shadow-md">
           <h2 className="text-2xl font-semibold border-b pb-2">Algorithm Results & Comparison</h2>
 
+          {/* Global API Error Display */}
+          {apiError && (
+              <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                  <p className="font-bold">Error:</p>
+                  <p>{apiError}</p>
+              </div>
+          )}
+
           {/* Result Display Area */}
           {results.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -115,19 +128,19 @@ const SolverPage: React.FC = () => {
           ) : isLoading ? (
             <div className="p-12 text-center text-gray-500">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-3"></div>
-              Running {selectedAlgorithm}... Please wait.
+              Running {selectedAlgorithm} on C++ Engine... (This may take a few seconds)
             </div>
           ) : (
             <div className="p-12 text-center text-gray-500 border border-dashed rounded-lg">
-              Run an algorithm to view the selected project subset and performance metrics here.
+              Click 'Run Budget Solver' to execute the algorithm on your dataset.
             </div>
           )}
           
-          {/* Optional Visualization Area */}
+          {/* Visualization Area */}
           <div className="mt-8 pt-4 border-t">
-            <h3 className="text-xl font-semibold mb-3">Visualization Area</h3>
+            <h3 className="text-xl font-semibold mb-3">Visualization Area (Selected Subset)</h3>
             <div className="border p-4 h-32 flex items-center justify-center bg-gray-50 text-gray-500">
-              Graphical highlight of selected projects and execution path goes here.
+              Highlighting of selected projects and execution path goes here.
             </div>
           </div>
         </div>
