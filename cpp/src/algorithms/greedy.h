@@ -2,9 +2,9 @@
 #define GREEDY_H
 
 #include <vector>
-#include "budget_lib.h"
+#include "budget_lib_cpp.h"
 
-Result greedy_subset_sum(const std::vector<int>& costs, int budget);
+Result run_greedy(const std::vector<int>& costs, int budget);
 
 #endif // GREEDY_H
 

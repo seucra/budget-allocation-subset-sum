@@ -3,7 +3,7 @@
 #include <chrono>
 #include <algorithm>
 
-Result brute_force_subset_sum(const std::vector<int>& costs, int budget) {
+Result run_brute_force(const std::vector<int>& costs, int budget) {
     auto start = std::chrono::high_resolution_clock::now();
 
     int n = (int)costs.size();

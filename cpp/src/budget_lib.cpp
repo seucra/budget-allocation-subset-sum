@@ -1,29 +1,61 @@
-#// budget_lib.cpp
+#include "budget_lib_cpp.h"
 #include "budget_lib.h"
+#include <cstdlib>   // for malloc/free
+#include <cstring>   // for memcpy
+#include <vector>
 
-#include "algorithms/brute_force.h"
-#include "algorithms/dp.h"
-#include "algorithms/backtracking.h"
-#include "algorithms/greedy.h"
-#include "algorithms/hybrid.h"
-
-Result run_brute_force(const std::vector<int>& costs, int budget) {
-    return brute_force_subset_sum(costs, budget);
+// Helper: convert Result to CResult
+static CResult to_c_result(const Result& res) {
+    CResult c_res;
+    c_res.count = static_cast<int>(res.indices.size());
+    c_res.total_cost = res.total_cost;
+    c_res.exec_time = res.execution_time_ms;
+    if (c_res.count > 0) {
+        c_res.indices = (int*)malloc(sizeof(int) * c_res.count);
+        std::memcpy(c_res.indices, res.indices.data(), sizeof(int) * c_res.count);
+    } else {
+        c_res.indices = nullptr;
+    }
+    return c_res;
 }
 
-Result run_dp(const std::vector<int>& costs, int budget) {
-    return dp_subset_sum(costs, budget);
+extern "C" {
+
+CResult run_brute_force_c(const int* costs, int n, int budget) {
+    std::vector<int> vec_costs(costs, costs + n);
+    Result res = run_brute_force(vec_costs, budget);
+    return to_c_result(res);
 }
 
-Result run_backtracking(const std::vector<int>& costs, int budget) {
-    return backtracking_subset_sum(costs, budget);
+CResult run_dp_c(const int* costs, int n, int budget) {
+    std::vector<int> vec_costs(costs, costs + n);
+    Result res = run_dp(vec_costs, budget);
+    return to_c_result(res);
 }
 
-Result run_greedy(const std::vector<int>& costs, int budget) {
-    return greedy_subset_sum(costs, budget);
+CResult run_greedy_c(const int* costs, int n, int budget) {
+    std::vector<int> vec_costs(costs, costs + n);
+    Result res = run_greedy(vec_costs, budget);
+    return to_c_result(res);
 }
 
-Result run_hybrid(const std::vector<int>& costs, int budget) {
-    return hybrid_subset_sum(costs, budget);
+CResult run_backtracking_c(const int* costs, int n, int budget) {
+    std::vector<int> vec_costs(costs, costs + n);
+    Result res = run_backtracking(vec_costs, budget);
+    return to_c_result(res);
 }
+
+CResult run_hybrid_c(const int* costs, int n, int budget) {
+    std::vector<int> vec_costs(costs, costs + n);
+    Result res = run_hybrid(vec_costs, budget);
+    return to_c_result(res);
+}
+
+void free_result(CResult result) {
+    if (result.indices != nullptr) {
+        free(result.indices);
+    }
+}
+
+} // extern "C"
 

@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <chrono>
 
-Result greedy_subset_sum(const std::vector<int>& costs, int budget) {
+Result run_greedy(const std::vector<int>& costs, int budget) {
     auto start = std::chrono::high_resolution_clock::now();
 
     int n = (int)costs.size();

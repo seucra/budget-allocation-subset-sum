@@ -6,13 +6,13 @@
 #include <algorithm>    // for std::sort
 #include <functional>   // for std::function
 
-Result hybrid_subset_sum(const std::vector<int>& costs, int budget) {
+Result run_hybrid(const std::vector<int>& costs, int budget) {
     auto start = std::chrono::high_resolution_clock::now();
 
     // Step 1: Greedy baseline
     Result g = greedy_subset_sum(costs, budget);
     int best_sum = g.total_cost;
-    std::vector<int> best_subset = g.selected_indices;
+    std::vector<int> best_subset = g.indices;
 
     int n = (int)costs.size();
 
