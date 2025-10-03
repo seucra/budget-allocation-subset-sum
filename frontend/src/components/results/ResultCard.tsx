@@ -1,7 +1,6 @@
 // frontend/src/components/results/ResultCard.tsx
 import React from 'react';
-import { IAlgorithmResult } from '../../types';
-
+import type { IAlgorithmResult } from '../../types'; 
 interface ResultCardProps {
   result: IAlgorithmResult;
   budget: number;

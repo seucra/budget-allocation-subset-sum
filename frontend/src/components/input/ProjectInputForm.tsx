@@ -1,8 +1,6 @@
 // frontend/src/components/input/ProjectInputForm.tsx
 import React, { useState } from 'react';
-import { IProject } from '../../types';
-
-interface ProjectInputFormProps {
+import type { IProject, IAlgorithmResult, ISolveRequest } from '../../types';interface ProjectInputFormProps {
   projects: IProject[];
   setProjects: (projects: IProject[]) => void;
   // For validation and error handling (as required by the report)

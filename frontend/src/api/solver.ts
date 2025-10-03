@@ -1,7 +1,7 @@
 // frontend/src/api/solver.ts
-import axios, { AxiosInstance } from 'axios';
-import { IProject, IAlgorithmRun, ISolveRequest } from '../types';
-
+import axios from 'axios';
+import type { AxiosInstance } from 'axios'; // CRITICAL FIX
+import type { IProject, IAlgorithmRun, ISolveRequest } from '../types';
 // Define the base URL for the FastAPI backend.
 // In a production environment, this should be an environment variable.
 const API_BASE_URL = 'http://127.0.0.1:8000'; 
