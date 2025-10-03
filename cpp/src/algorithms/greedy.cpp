@@ -1,34 +1,32 @@
+// algorithms/greedy.cpp
 #include "greedy.h"
-#include <chrono>
-#include <vector>
 #include <algorithm>
+#include <chrono>
 
 Result greedy_subset_sum(const std::vector<int>& costs, int budget) {
     auto start = std::chrono::high_resolution_clock::now();
 
-    // Sort indices by cost ascending
     int n = (int)costs.size();
-    std::vector<int> indices(n);
-    for (int i = 0; i < n; ++i) indices[i] = i;
+    std::vector<std::pair<int,int>> order;
+    order.reserve(n);
+    for (int i = 0; i < n; ++i) order.emplace_back(costs[i], i);
 
-    std::sort(indices.begin(), indices.end(), [&](int a, int b) {
-        return costs[a] < costs[b];
-    });
+    // Simple greedy: sort ascending by cost
+    std::sort(order.begin(), order.end());
 
-    std::vector<int> selected_indices;
-    int total = 0;
-    for (int idx : indices) {
-        if (total + costs[idx] <= budget) {
-            total += costs[idx];
-            selected_indices.push_back(idx);
+    std::vector<int> selected;
+    int sum = 0;
+    for (auto &p : order) {
+        if (sum + p.first <= budget) {
+            sum += p.first;
+            selected.push_back(p.second);
         } else {
-            break;
+            continue;
         }
     }
 
     auto end = std::chrono::high_resolution_clock::now();
-    double duration_ms = std::chrono::duration<double, std::milli>(end - start).count();
-
-    return {selected_indices, total, duration_ms, 0.0};
+    std::chrono::duration<double, std::milli> dur = end - start;
+    return {selected, sum, dur.count(), 0.0};
 }
 
