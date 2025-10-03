@@ -1,56 +1,48 @@
-// algorithms/dp.cpp
-#include "dp.h"
-#include <chrono>
+#include "../include/budget_lib.h"
 #include <algorithm>
+#include <vector>
+#include <chrono>
 
 Result run_dp(const std::vector<int>& costs, int budget) {
     auto start = std::chrono::high_resolution_clock::now();
 
-    int n = (int)costs.size();
-    if (budget < 0) budget = 0;
-    // Use bitset-like DP but as vector<char> to reduce memory for large budgets
-    std::vector<char> dp(budget + 1, 0);
-    std::vector<std::vector<char>> take; // for backtracking - optional tradeoff: memory heavy
-    dp[0] = 1;
+    if (budget <= 0 || costs.empty()) return {{}, 0, 0.0, 0.0};
 
-    // To backtrack, store parent info: previous reachable states for each item index.
-    // We'll use a vector of vectors<int> parent that marks which previous sum leads to current.
-    // Simpler: record a 2D dp (bool) if budget * n reasonable. For safety, we'll record prev choice indexes.
-    std::vector<std::vector<int>> prev(n + 1, std::vector<int>(budget + 1, -1));
-    std::vector<std::vector<char>> dp2(n + 1, std::vector<char>(budget + 1, 0));
-    dp2[0][0] = 1;
+    int n = costs.size();
+    std::vector<int> dp(budget + 1, 0);
+    std::vector<std::vector<int>> selected(budget + 1);
 
-    for (int i = 1; i <= n; ++i) {
-        int c = costs[i - 1];
-        for (int w = 0; w <= budget; ++w) {
-            if (dp2[i - 1][w]) {
-                dp2[i][w] = 1;
-                // don't set prev since not taking
-            }
-            if (w >= c && dp2[i - 1][w - c]) {
-                dp2[i][w] = 1;
-                prev[i][w] = 1; // mark that i was used to reach w
+    for (int i = 0; i < n; ++i) {
+        if (costs[i] <= 0) continue;
+        for (int w = budget; w >= costs[i]; --w) {
+            int candidate_sum = dp[w - costs[i]] + costs[i];
+            if (candidate_sum > dp[w] || 
+                (candidate_sum == dp[w] && 
+                 (selected[w - costs[i]].size() + 1 < selected[w].size() || 
+                  (selected[w - costs[i]].size() + 1 == selected[w].size() && selected[w - costs[i]] < selected[w])))) {
+                dp[w] = candidate_sum;
+                selected[w] = selected[w - costs[i]];
+                selected[w].push_back(i);
             }
         }
     }
 
-    int best = 0;
+    int best_sum = 0;
+    std::vector<int> best_indices;
     for (int w = budget; w >= 0; --w) {
-        if (dp2[n][w]) { best = w; break; }
-    }
-
-    std::vector<int> selected;
-    int w = best;
-    for (int i = n; i > 0 && w > 0; --i) {
-        if (prev[i][w] == 1) {
-            selected.push_back(i - 1);
-            w -= costs[i - 1];
+        if (dp[w] > best_sum || 
+            (dp[w] == best_sum && 
+             (selected[w].size() < best_indices.size() || 
+              (selected[w].size() == best_indices.size() && selected[w] < best_indices)))) {
+            best_sum = dp[w];
+            best_indices = selected[w];
         }
     }
-    std::reverse(selected.begin(), selected.end());
 
+    std::sort(best_indices.begin(), best_indices.end());
+    double mem_mb = (budget + 1) * (sizeof(int) + sizeof(std::vector<int>)) / (1024.0 * 1024.0);
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> dur = end - start;
-    return {selected, best, dur.count(), 0.0};
-}
 
+    return {best_indices, best_sum, dur.count(), mem_mb};
+}

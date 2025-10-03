@@ -1,51 +1,41 @@
-// algorithms/backtracking.cpp
-#include "backtracking.h"
+#include "../include/budget_lib.h"
+#include <vector>
 #include <chrono>
 
-struct BTState {
-    int best_sum = 0;
-    std::vector<int> best_subset;
-
-    // NEW: add a counter to limit recursive calls
-    int call_count = 0;
-    const int MAX_CALLS = 1'000'000;  // 1 million calls
-};
-
-void bt_helper(const std::vector<int>& costs, int budget, int idx, int current_sum,
-               std::vector<int>& current, BTState& state) {
-
-        // ✅ Stop if too many recursive calls
-    if (++state.call_count > state.MAX_CALLS) return;
-
-    if (current_sum > budget) return;
-    if (current_sum > state.best_sum) {
-        state.best_sum = current_sum;
-        state.best_subset = current;
+void bt_helper(const std::vector<int>& costs, int budget, int idx, int cur_sum, 
+               std::vector<int>& cur_selected, int& max_sum, std::vector<int>& best_selected, 
+               int& call_count, const int max_calls = 1000000) {
+    if (call_count++ > max_calls) return;
+    if (cur_sum > budget) return;
+    if (cur_sum > max_sum || 
+        (cur_sum == max_sum && 
+         (cur_selected.size() < best_selected.size() || 
+          (cur_selected.size() == best_selected.size() && cur_selected < best_selected)))) {
+        max_sum = cur_sum;
+        best_selected = cur_selected;
     }
-    if (idx >= (int)costs.size()) return;
+    if (idx >= static_cast<int>(costs.size())) return;
 
-    // Bound: if current_sum + remaining_possible <= state.best_sum, prune
-    // Compute optimistic remaining sum quickly (not exact but simple): sum of remaining items
-    // (optional improvement omitted for speed of compile)
-
-    // Choose include
-    current.push_back(idx);
-    bt_helper(costs, budget, idx + 1, current_sum + costs[idx], current, state);
-    current.pop_back();
-
-    // Exclude
-    bt_helper(costs, budget, idx + 1, current_sum, current, state);
+    if (costs[idx] > 0) {
+        cur_selected.push_back(idx);
+        bt_helper(costs, budget, idx + 1, cur_sum + costs[idx], cur_selected, max_sum, best_selected, call_count, max_calls);
+        cur_selected.pop_back();
+    }
+    bt_helper(costs, budget, idx + 1, cur_sum, cur_selected, max_sum, best_selected, call_count, max_calls);
 }
 
 Result run_backtracking(const std::vector<int>& costs, int budget) {
     auto start = std::chrono::high_resolution_clock::now();
 
-    BTState state;
-    std::vector<int> cur;
-    bt_helper(costs, budget, 0, 0, cur, state);
+    if (budget <= 0 || costs.empty()) return {{}, 0, 0.0, 0.0};
 
+    int max_sum = 0;
+    std::vector<int> best_selected, cur_selected;
+    int call_count = 0;
+    bt_helper(costs, budget, 0, 0, cur_selected, max_sum, best_selected, call_count);
+
+    double mem_mb = costs.size() * sizeof(int) / (1024.0 * 1024.0);
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> dur = end - start;
-    return {state.best_subset, state.best_sum, dur.count(), 0.0};
+    return {best_selected, max_sum, dur.count(), mem_mb};
 }
-
