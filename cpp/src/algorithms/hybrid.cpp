@@ -1,88 +1,61 @@
-// algorithms/hybrid.cpp
-#include "hybrid.h"
-#include "greedy.h"
-#include "backtracking.h"
-#include <chrono>
-#include <algorithm>    // for std::sort
-#include <functional>   // for std::function
+#include "../include/budget_lib.h"
+#include "../include/greedy.h"
+#include <algorithm>
+#include <functional>
 
 Result run_hybrid(const std::vector<int>& costs, int budget) {
     auto start = std::chrono::high_resolution_clock::now();
 
-    // Step 1: Greedy baseline
-    Result g = greedy_subset_sum(costs, budget);
-    int best_sum = g.total_cost;
-    std::vector<int> best_subset = g.indices;
+    if (budget <= 0 || costs.empty()) return {{}, 0, 0.0, 0.0};
 
-    int n = (int)costs.size();
+    Result greedy_res = run_greedy(costs, budget);
+    int best_sum = greedy_res.total_cost;
+    std::vector<int> best_selected = greedy_res.indices;
 
-    // Choose a small candidate window K
-    int K = std::min(n, 15);
-
-    // Prepare pairs (cost, index)
-    std::vector<std::pair<int,int>> order;
-    order.reserve(n);
-    for (int i = 0; i < n; ++i) {
-        order.emplace_back(costs[i], i);
+    int k = std::min(static_cast<int>(costs.size()), 10);
+    std::vector<std::pair<int, int>> ordered;
+    for (size_t i = 0; i < costs.size(); ++i) {
+        if (costs[i] > 0) ordered.emplace_back(costs[i], i);
     }
-    std::sort(order.begin(), order.end());
-
-    // Candidate indices
-    std::vector<int> cand_idx;
-    cand_idx.reserve(K);
-    for (int i = 0; i < K; ++i) {
-        cand_idx.push_back(order[i].second);
-    }
-    // Candidate costs in same order
-    std::vector<int> cand_costs;
-    cand_costs.reserve(K);
-    for (int idx : cand_idx) {
-        cand_costs.push_back(costs[idx]);
+    std::sort(ordered.begin(), ordered.end());
+    std::vector<int> cand_costs, cand_indices;
+    for (int i = 0; i < k && i < static_cast<int>(ordered.size()); ++i) {
+        cand_costs.push_back(ordered[i].first);
+        cand_indices.push_back(ordered[i].second);
     }
 
-    // Local backtracking on small candidate set
     struct LocalState {
         int best_sum = 0;
         std::vector<int> best_subset;
     };
     LocalState ls;
-    std::vector<int> cur;
-
-    // Lambda with correct capture
+    std::vector<int> cur_selected;
     std::function<void(int, int)> local_bt = [&](int idx, int cur_sum) {
         if (cur_sum > budget) return;
-        if (cur_sum > ls.best_sum) {
+        if (cur_sum > ls.best_sum || 
+            (cur_sum == ls.best_sum && 
+             (cur_selected.size() < ls.best_subset.size() || 
+              (cur_selected.size() == ls.best_subset.size() && cur_selected < ls.best_subset)))) {
             ls.best_sum = cur_sum;
-            ls.best_subset = cur;
+            ls.best_subset = cur_selected;
         }
-        if (idx >= K) return;
+        if (idx >= static_cast<int>(cand_costs.size())) return;
 
-        // include
-        cur.push_back(idx);
+        cur_selected.push_back(cand_indices[idx]);
         local_bt(idx + 1, cur_sum + cand_costs[idx]);
-        cur.pop_back();
-        // exclude
+        cur_selected.pop_back();
         local_bt(idx + 1, cur_sum);
     };
-
     local_bt(0, 0);
 
-    // Translate local best subset indices to original indices
-    std::vector<int> local_selection;
-    int local_sum = 0;
-    for (int c : ls.best_subset) {
-        int orig = cand_idx[c];
-        local_selection.push_back(orig);
-        local_sum += costs[orig];
+    if (ls.best_sum > best_sum && ls.best_sum <= budget) {
+        best_sum = ls.best_sum;
+        best_selected = ls.best_subset;
     }
 
-    if (local_sum > best_sum && local_sum <= budget) {
-        best_sum = local_sum;
-        best_subset = std::move(local_selection);
-    }
-
+    double mem_mb = (costs.size() * sizeof(int) + cand_costs.size() * sizeof(int) +
+                     ls.best_subset.size() * sizeof(int)) / (1024.0 * 1024.0);
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> dur = end - start;
-    return {best_subset, best_sum, dur.count(), 0.0};
+    return {best_selected, best_sum, dur.count(), mem_mb};
 }
-

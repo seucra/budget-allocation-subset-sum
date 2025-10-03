@@ -1,51 +1,54 @@
-// algorithms/brute_force.cpp
-#include "brute_force.h"
+#include "../include/budget_lib.h"
+#include <cstdint>
+#include <vector>
 #include <chrono>
-#include <algorithm>
 
 Result run_brute_force(const std::vector<int>& costs, int budget) {
     auto start = std::chrono::high_resolution_clock::now();
 
-    int n = (int)costs.size();
-    long long best_sum = 0;
-    std::vector<int> best_subset;
+    int n = costs.size();
+    if (n <= 0 || budget <= 0 || n > 20) return {{}, 0, 0.0, 0.0};
 
-    // If n is large, this will be infeasible — caller should avoid calling brute force for large n.
-    if (n <= 0) {
-        Result r{{}, 0, 0.0, 0.0};
-        return r;
-    }
-    // Prevent shifting overflow for n >= 31 on 32-bit ints: use unsigned long long for mask
-    unsigned long long total_subsets = 1ULL << n;
-    if (n >= 63) total_subsets = 0; // avoid trying to iterate monstrous counts
+    int max_sum = 0;
+    std::vector<int> best_selected;
+    std::vector<int> selected;
+    selected.reserve(n);
 
-    // If n >= 63, we bail early (too large)
-    if (n >= 63) {
-        auto end = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double, std::milli> dur = end - start;
-        return {{}, 0, dur.count(), 0.0};
-    }
+    uint64_t total = 1ULL << n;
+    for (uint64_t mask = 0; mask < total; ++mask) {
+        int sum = 0;
+        selected.clear();
+        bool valid = true;
 
-    for (unsigned long long mask = 0; mask < total_subsets; ++mask) {
-        long long sum = 0;
-        std::vector<int> subset;
         for (int i = 0; i < n; ++i) {
             if (mask & (1ULL << i)) {
+                if (costs[i] <= 0) {
+                    valid = false;
+                    break;
+                }
                 sum += costs[i];
-                if (sum > budget) break; // small pruning
-                subset.push_back(i);
+                if (sum > budget) {
+                    valid = false;
+                    break;
+                }
+                selected.push_back(i);
             }
         }
-        if (sum <= budget && sum > best_sum) {
-            best_sum = sum;
-            best_subset = subset;
-            if (best_sum == budget) break; // perfect fit
+
+        if (!valid) continue;
+
+        if (sum > max_sum || 
+            (sum == max_sum && 
+             (selected.size() < best_selected.size() || 
+              (selected.size() == best_selected.size() && selected < best_selected)))) {
+            max_sum = sum;
+            best_selected = selected;
+            if (max_sum == budget) break;
         }
     }
 
+    double mem_mb = n * sizeof(int) / (1024.0 * 1024.0);
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> dur = end - start;
-
-    return {best_subset, (int)best_sum, dur.count(), 0.0};
+    return {best_selected, max_sum, dur.count(), mem_mb};
 }
-
