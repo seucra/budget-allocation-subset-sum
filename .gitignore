@@ -1,0 +1,83 @@
+# ------------------------------------
+# 1. Operating System Files
+# ------------------------------------
+.DS_Store
+Thumbs.db
+
+# ------------------------------------
+# 2. C++ & Compilation Artifacts
+# ------------------------------------
+# Object files (from compilation step in docs/readme-checkpoint1.md)
+*.o
+# Executables (e.g., test_budget from main.cpp)
+test_budget
+# Shared libraries (e.g., libbudget.so from Step 4 in docs/readme-checkpoint1.md)
+*.so
+*.dll
+# Static libraries
+*.a
+# Dependency/Build directories
+build/
+cmake-build-debug/
+bin/
+# Profiling files (gprof, valgrind, mentioned in docs/dev-backend-mustread-revised.md)
+*.gmon
+*.prof
+valgrind-out.*
+# C++ specific memory analysis (from cpp/src/algorithms/main.cpp)
+*.mem
+
+# ------------------------------------
+# 3. Python & FastAPI Artifacts
+# ------------------------------------
+# Virtual environment (Python)
+.venv
+venv/
+env/
+# Byte-compiled files
+*.pyc
+__pycache__/
+# Python installer logs
+*.log
+# Packaging
+dist/
+build/
+*.egg-info/
+# Profiling files (memory_profiler, cProfile, mentioned in docs/dev-notes.md)
+.pytest_cache/
+
+# ------------------------------------
+# 4. Frontend (React/Streamlit) Artifacts
+# ------------------------------------
+# Node modules for React or other frontend tools
+node_modules
+# Production build directory (e.g., for React or Streamlit cache)
+build/
+dist/
+.cache/
+npm-debug.log*
+yarn-error.log
+
+# ------------------------------------
+# 5. Database & Configuration
+# ------------------------------------
+# Local database files (if not using Docker volumes)
+*.sqlite
+*.db
+data/
+# Environment files (secrets/configuration)
+.env
+.flaskenv
+.secrets.toml
+
+# ------------------------------------
+# 6. IDE and Tooling
+# ------------------------------------
+# Visual Studio Code
+.vscode/
+# JetBrains IDEs (e.g., CLion, PyCharm)
+.idea/
+# Editor history and backup files
+*~
+# Logs directory
+logs/
