@@ -1,4 +1,11 @@
+#// budget_lib.cpp
 #include "budget_lib.h"
+
+#include "algorithms/brute_force.h"
+#include "algorithms/dp.h"
+#include "algorithms/backtracking.h"
+#include "algorithms/greedy.h"
+#include "algorithms/hybrid.h"
 
 Result run_brute_force(const std::vector<int>& costs, int budget) {
     return brute_force_subset_sum(costs, budget);

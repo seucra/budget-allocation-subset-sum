@@ -30,7 +30,11 @@ This project implements various algorithms (Dynamic Programming, Backtracking, G
 
 ## How to Run:
 ```
-    yet to come
+rm -rf cpp/src/build
+cmake -S cpp/src -B cpp/src/build
+cmake --build cpp/src/build
+
+
 ```
 
 ---

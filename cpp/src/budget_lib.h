@@ -1,28 +1,21 @@
+// budget_lib.h
 #ifndef BUDGET_LIB_H
 #define BUDGET_LIB_H
 
-#include "common.h"
-#include "brute_force.h"
-#include "dp.h"
-#include "backtracking.h"
-#include "greedy.h"
-#include "hybrid.h"
+#include <vector>
 
-// Optionally, export functions with C linkage for easier Python binding later
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+struct Result {
+    std::vector<int> selected_indices;
+    int total_cost;
+    double execution_time_ms;
+    double memory_used_mb;
+};
 
 Result run_brute_force(const std::vector<int>& costs, int budget);
 Result run_dp(const std::vector<int>& costs, int budget);
 Result run_backtracking(const std::vector<int>& costs, int budget);
 Result run_greedy(const std::vector<int>& costs, int budget);
 Result run_hybrid(const std::vector<int>& costs, int budget);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // BUDGET_LIB_H
 

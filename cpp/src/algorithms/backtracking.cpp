@@ -1,38 +1,51 @@
+// algorithms/backtracking.cpp
 #include "backtracking.h"
 #include <chrono>
-#include <vector>
 
-void backtrack(const std::vector<int>& costs, int budget, int idx,
-               int current_sum, std::vector<int>& current_set,
-               int& best_sum, std::vector<int>& best_set) {
-    if (current_sum > best_sum && current_sum <= budget) {
-        best_sum = current_sum;
-        best_set = current_set;
-    }
-    if (idx == (int)costs.size() || current_sum >= budget) return;
+struct BTState {
+    int best_sum = 0;
+    std::vector<int> best_subset;
 
-    // Choose idx
-    if (current_sum + costs[idx] <= budget) {
-        current_set.push_back(idx);
-        backtrack(costs, budget, idx + 1, current_sum + costs[idx], current_set, best_sum, best_set);
-        current_set.pop_back();
+    // NEW: add a counter to limit recursive calls
+    int call_count = 0;
+    const int MAX_CALLS = 1'000'000;  // 1 million calls
+};
+
+void bt_helper(const std::vector<int>& costs, int budget, int idx, int current_sum,
+               std::vector<int>& current, BTState& state) {
+
+        // ✅ Stop if too many recursive calls
+    if (++state.call_count > state.MAX_CALLS) return;
+
+    if (current_sum > budget) return;
+    if (current_sum > state.best_sum) {
+        state.best_sum = current_sum;
+        state.best_subset = current;
     }
-    // Don't choose idx
-    backtrack(costs, budget, idx + 1, current_sum, current_set, best_sum, best_set);
+    if (idx >= (int)costs.size()) return;
+
+    // Bound: if current_sum + remaining_possible <= state.best_sum, prune
+    // Compute optimistic remaining sum quickly (not exact but simple): sum of remaining items
+    // (optional improvement omitted for speed of compile)
+
+    // Choose include
+    current.push_back(idx);
+    bt_helper(costs, budget, idx + 1, current_sum + costs[idx], current, state);
+    current.pop_back();
+
+    // Exclude
+    bt_helper(costs, budget, idx + 1, current_sum, current, state);
 }
 
 Result backtracking_subset_sum(const std::vector<int>& costs, int budget) {
     auto start = std::chrono::high_resolution_clock::now();
 
-    int best_sum = 0;
-    std::vector<int> best_set;
-    std::vector<int> current_set;
-
-    backtrack(costs, budget, 0, 0, current_set, best_sum, best_set);
+    BTState state;
+    std::vector<int> cur;
+    bt_helper(costs, budget, 0, 0, cur, state);
 
     auto end = std::chrono::high_resolution_clock::now();
-    double duration_ms = std::chrono::duration<double, std::milli>(end - start).count();
-
-    return {best_set, best_sum, duration_ms, 0.0};
+    std::chrono::duration<double, std::milli> dur = end - start;
+    return {state.best_subset, state.best_sum, dur.count(), 0.0};
 }
 
