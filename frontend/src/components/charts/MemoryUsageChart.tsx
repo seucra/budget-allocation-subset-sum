@@ -20,12 +20,11 @@ ChartJS.register(
   Legend
 );
 
-// Note: Using the same data structure as the time chart for simplicity
 interface BenchmarkDataPoint {
-    input_size: number;
-    brute_force_mem: number; // MB
-    dp_mem: number; // MB
-    greedy_mem: number; // MB
+  input_size: number;
+  brute_force_mem: number;
+  dp_mem: number;
+  greedy_mem: number;
 }
 
 interface MemoryUsageChartProps {
@@ -33,11 +32,17 @@ interface MemoryUsageChartProps {
 }
 
 const MemoryUsageChart: React.FC<MemoryUsageChartProps> = ({ data }) => {
-  // Use data for N=30 (or similar) to compare memory at a single complex point, 
-  // as memory complexity is often analyzed at maximum load.
-  const labels = data.map(d => d.input_size);
+  // Add safety check for empty data
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-gray-500">No data available for chart</p>
+      </div>
+    );
+  }
+
   const chartData = {
-    labels: labels, 
+    labels: data.map(d => d.input_size),
     datasets: [
       {
         label: 'Dynamic Programming (MB)',
@@ -54,6 +59,7 @@ const MemoryUsageChart: React.FC<MemoryUsageChartProps> = ({ data }) => {
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false, // Important for fixed container height
     plugins: {
       legend: {
         position: 'top' as const,
@@ -64,18 +70,18 @@ const MemoryUsageChart: React.FC<MemoryUsageChartProps> = ({ data }) => {
       },
     },
     scales: {
-        x: {
-            title: {
-                display: true,
-                text: 'Input Size (Number of Projects)'
-            }
-        },
-        y: {
-            title: {
-                display: true,
-                text: 'Memory Used (MB)'
-            }
+      x: {
+        title: {
+          display: true,
+          text: 'Input Size (Number of Projects)'
         }
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Memory Used (MB)'
+        }
+      }
     }
   };
 
