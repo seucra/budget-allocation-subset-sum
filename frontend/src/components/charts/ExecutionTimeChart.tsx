@@ -23,7 +23,6 @@ ChartJS.register(
   Legend
 );
 
-// Define a type for the data structure expected from the backend benchmark API
 interface BenchmarkDataPoint {
   input_size: number;
   brute_force_time: number;
@@ -36,8 +35,17 @@ interface ExecutionTimeChartProps {
 }
 
 const ExecutionTimeChart: React.FC<ExecutionTimeChartProps> = ({ data }) => {
+  // Add safety check for empty data
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-gray-500">No data available for chart</p>
+      </div>
+    );
+  }
+
   const chartData = {
-    labels: data.map(d => d.input_size), // Input size (N) on X-axis
+    labels: data.map(d => d.input_size),
     datasets: [
       {
         label: 'Brute Force (ms)',
@@ -65,6 +73,7 @@ const ExecutionTimeChart: React.FC<ExecutionTimeChartProps> = ({ data }) => {
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false, // Important for fixed container height
     plugins: {
       legend: {
         position: 'top' as const,
@@ -75,19 +84,19 @@ const ExecutionTimeChart: React.FC<ExecutionTimeChartProps> = ({ data }) => {
       },
     },
     scales: {
-        x: {
-            title: {
-                display: true,
-                text: 'Input Size (Number of Projects)'
-            }
-        },
-        y: {
-            title: {
-                display: true,
-                text: 'Time (ms)'
-            },
-            type: 'logarithmic' as const // Use logarithmic scale for clear comparison of O(2^N) vs O(N*W)
+      x: {
+        title: {
+          display: true,
+          text: 'Input Size (Number of Projects)'
         }
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Time (ms)'
+        },
+        type: 'linear' as const // Changed from logarithmic to linear for now
+      }
     }
   };
 
