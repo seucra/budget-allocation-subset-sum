@@ -3,9 +3,8 @@ import React, { useState, useEffect } from 'react';
 import ExecutionTimeChart from '../components/charts/ExecutionTimeChart';
 import MemoryUsageChart from '../components/charts/MemoryUsageChart';
 // START STEP 4: Import mock functions and types from the new mock file
-// NOTE: If the path below fails, ensure the mocks.ts file is correctly saved in src/api/
-import type { BenchmarkResult } from '../api/mocks.ts';
-import { mockFetchBenchmarks } from '../api/mocks.ts';
+import type { BenchmarkResult } from '../api/mocks';
+import { mockFetchBenchmarks } from '../api/mocks';
 // END STEP 4
 
 const AnalyticsPage: React.FC = () => {
@@ -18,7 +17,8 @@ const AnalyticsPage: React.FC = () => {
     setIsLoading(true);
     // In production, this would be an Axios call to the FastAPI GET /benchmark/ endpoint
     // START STEP 4: Call the imported mock fetch function
-    mockFetchBenchmarks().then((data: BenchmarkResult[]) => { // <-- FIX: Added type annotation for 'data'
+    // FIX: Added type annotation for 'data' for type safety
+    mockFetchBenchmarks().then((data: BenchmarkResult[]) => { 
       setBenchmarkData(data);
       setIsLoading(false);
     });

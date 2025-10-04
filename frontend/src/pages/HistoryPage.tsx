@@ -1,45 +1,9 @@
 // frontend/src/pages/HistoryPage.tsx
 import React, { useState, useEffect } from 'react';
-import type {  IAlgorithmRun } from '../types'; 
-// --- MOCK API DATA AND FUNCTION ---
-// In a real application, this would be an Axios call to GET /results/{run_id}/ or a list endpoint.
-
-const mockHistoryData: IAlgorithmRun[] = [
-  {
-    run_id: 'run-001',
-    dataset_id: 'data-A',
-    budget: 300,
-    selected_indices: [0, 1, 3],
-    total_cost: 240,
-    execution_time_ms: 50.123,
-    memory_used_mb: 1.2,
-    status: 'exact',
-    algorithm_name: 'Dynamic Programming',
-    input_projects: [],
-    created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-  },
-  {
-    run_id: 'run-002',
-    dataset_id: 'data-B',
-    budget: 500,
-    selected_indices: [5, 6, 7, 8],
-    total_cost: 485,
-    execution_time_ms: 100.5,
-    memory_used_mb: 2.5,
-    status: 'approximate',
-    algorithm_name: 'Hybrid',
-    input_projects: [],
-    created_at: new Date().toISOString(),
-  },
-];
-
-const mockFetchHistory = (): Promise<IAlgorithmRun[]> => {
-  return new Promise((resolve) => {
-    // Simulate network delay
-    setTimeout(() => resolve(mockHistoryData), 500);
-  });
-};
-// --- END MOCK ---
+import type { IAlgorithmRun } from '../types'; 
+// START STEP 5: Import the mock fetch function from the centralized API mocks file
+import { mockFetchHistory } from '../api/mocks';
+// END STEP 5
 
 // Helper Component for displaying the list row
 interface RunRowProps {
@@ -76,6 +40,7 @@ const HistoryPage: React.FC = () => {
   useEffect(() => {
     // Fetch historical runs on component mount
     setIsLoading(true);
+    // START STEP 5: Call the imported mock fetch function
     mockFetchHistory().then(data => {
       setHistory(data);
       setIsLoading(false);
@@ -84,6 +49,7 @@ const HistoryPage: React.FC = () => {
         setSelectedRun(data[0]); 
       }
     });
+    // END STEP 5
   }, []);
   
   // Renders the detailed information of the selected run
