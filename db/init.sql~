@@ -1,0 +1,2 @@
+-- Already handled by SQLAlchemy's Base.metadata.create_all in db.py
+-- This file can be empty or used for manual setup if needed
