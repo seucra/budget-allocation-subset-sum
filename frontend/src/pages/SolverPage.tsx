@@ -1,6 +1,6 @@
 // frontend/src/pages/SolverPage.tsx
 import React, { useState, useCallback } from 'react';
-import type { IProject, IAlgorithmResult, ISolveRequest } from '../types'; // <-- CRITICAL FIX
+import type { IProject, IAlgorithmResult, ISolveRequest } from '../types'; 
 import ProjectInputForm from '../components/input/ProjectInputForm';
 import BudgetControl from '../components/input/BudgetControl';
 import AlgorithmSelector from '../components/input/AlgorithmSelector';
@@ -27,7 +27,7 @@ const SolverPage: React.FC = () => {
   const [backendValidationErrors, setBackendValidationErrors] = useState<any>(null);
 
 
-  // --- Core Logic: Handling API Call ---
+  // --- Core Logic: Handling API Call (omitted for brevity) ---
   const handleSolve = useCallback(async () => {
     setApiError(null);
     setBackendValidationErrors(null);
@@ -65,13 +65,16 @@ const SolverPage: React.FC = () => {
       setResults([AlgorithmResult]); // Display the single result
       
     } catch (error: any) {
-      // Robust Error Handling for C++ algorithm latency and validation errors
       
-      // Check for structured validation errors (e.g., Pydantic errors from FastAPI)
       if (error.message.includes("API Error:") && error.message.includes("{")) {
-          // Attempt to parse validation details if the API returned structured JSON errors
-          setBackendValidationErrors(JSON.parse(error.message.split("API Error: ")[1]));
-          setApiError("Validation Failed. Check input fields for specific errors.");
+          // Check for structured validation errors (Step 3 will enhance this display)
+          try {
+             const structuredError = JSON.parse(error.message.split("API Error: ")[1]);
+             setBackendValidationErrors(structuredError);
+             setApiError("Input validation failed. See specific errors below."); 
+          } catch {
+             setApiError(error.message);
+          }
       } else {
           setApiError(error.message || "An unknown error occurred during computation.");
       }
@@ -96,6 +99,8 @@ const SolverPage: React.FC = () => {
             projects={projects} 
             setProjects={setProjects} 
             backendErrors={backendValidationErrors} 
+            // STEP 2: Pass selected indices from the most recent result
+            selectedIndices={results.length > 0 ? results[0].selected_indices : []}
           />
           
           <AlgorithmSelector
@@ -110,7 +115,7 @@ const SolverPage: React.FC = () => {
         <div className="lg:col-span-2 space-y-6 p-4 border rounded-lg bg-white shadow-md">
           <h2 className="text-2xl font-semibold border-b pb-2">Algorithm Results & Comparison</h2>
 
-          {/* Global API Error Display */}
+          {/* Global API Error Display (omitted for brevity) */}
           {apiError && (
               <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
                   <p className="font-bold">Error:</p>
@@ -118,7 +123,7 @@ const SolverPage: React.FC = () => {
               </div>
           )}
 
-          {/* Result Display Area */}
+          {/* Result Display Area (omitted for brevity) */}
           {results.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {results.map((result, index) => (
