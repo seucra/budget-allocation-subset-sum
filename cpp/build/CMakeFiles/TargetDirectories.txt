@@ -1,3 +1,0 @@
-/home/seucra/github/budget-allocation-subset-sum/cpp/build/CMakeFiles/budget_module.dir
-/home/seucra/github/budget-allocation-subset-sum/cpp/build/CMakeFiles/edit_cache.dir
-/home/seucra/github/budget-allocation-subset-sum/cpp/build/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,114 @@
+# ====================
+# Node / Frontend
+# ====================
+node_modules/
+frontend/node_modules/
+dist/
+build/
+frontend/dist/
+frontend/build/
+.cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ====================
+# Python
+# ====================
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.venv/
+.env/
+build/
+dist/
+*.egg-info/
+.eggs/
+*.wheel
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+*.log
+
+# ====================
+# C++ / C / Build
+# ====================
+*.o
+*.obj
+*.lo
+*.la
+*.al
+*.libs
+*.exe
+*.out
+*.app
+*.so
+*.dll
+*.a
+test_budget
+cmake-build-debug/
+build/
+bin/
+Debug/
+Release/
+x64/
+x86/
+*.gmon
+*.prof
+valgrind-out.*
+*.mem
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.pro.user*
+*.qmake.stash
+
+# ====================
+# General / OS
+# ====================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.Trashes
+*.tmp
+*.temp
+*~
+*.bak
+*.swp
+
+# ====================
+# Alembic / DB migrations
+# ====================
+alembic.ini~
+db/migrations/versions/*.pyc
+
+# ====================
+# Database & Configuration
+# ====================
+*.sqlite
+*.db
+data/
+.env
+.flaskenv
+.secrets.toml
+
+# ====================
+# IDE and Tooling
+# ====================
+.vscode/
+.idea/
+*~
+logs/
+
+# ====================
+# Docker
+# ====================
+docker-compose.override.yml
+*.env
+
