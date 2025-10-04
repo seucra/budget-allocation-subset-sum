@@ -7,7 +7,7 @@ import AlgorithmSelector from '../components/input/AlgorithmSelector';
 import ResultCard from '../components/results/ResultCard';
 import { runSolver } from '../api/solver';
 
-// Initial state for demonstration purposes
+// Initial state definitions (omitted for brevity)
 const INITIAL_PROJECTS: IProject[] = [
   { id: '1', name: 'Project Alpha', cost: 120 },
   { id: '2', name: 'Project Beta', cost: 80 },
@@ -15,6 +15,24 @@ const INITIAL_PROJECTS: IProject[] = [
   { id: '4', name: 'Project Delta', cost: 40 },
 ];
 const INITIAL_BUDGET = 300;
+
+
+// START STEP 3: HELPER FUNCTION FOR FORMATTING ERRORS
+const formatValidationErrors = (errors: any): string[] => {
+    // Check if the error object has the expected FastAPI/Pydantic structure
+    if (!errors || !Array.isArray(errors.detail)) {
+        return ["Unknown validation error format."];
+    }
+    
+    // Assumes FastAPI/Pydantic error format: [{ loc: [..., field], msg: "..." }, ...]
+    return errors.detail.map((err: any) => {
+        // Formats location array into a readable string (e.g., "projects.1.cost")
+        const location = err.loc.slice(1).join('.'); 
+        return `${location}: ${err.msg}`;
+    });
+};
+// END STEP 3: HELPER FUNCTION FOR FORMATTING ERRORS
+
 
 const SolverPage: React.FC = () => {
   // --- State Management ---
@@ -38,21 +56,17 @@ const SolverPage: React.FC = () => {
     }
 
     setIsLoading(true);
-    setResults([]); // Clear previous results
+    setResults([]); 
 
-    // Prepare the request body (aligning with ISolveRequest)
     const request: ISolveRequest = {
       projects: projects,
       budget: budget,
-      // Pass the selected algorithm, or undefined if 'Auto-Select' is chosen
       algorithm: selectedAlgorithm === 'Auto-Select (Smart Solver)' ? undefined : selectedAlgorithm,
     };
 
     try {
-      // Execute the API call (POST /solve/)
       const result = await runSolver(request);
       
-      // Since the API returns one result (IAlgorithmRun), we adapt it to IAlgorithmResult array
       const AlgorithmResult: IAlgorithmResult= {
         selected_indices: result.selected_indices,
         total_cost: result.total_cost,
@@ -62,27 +76,37 @@ const SolverPage: React.FC = () => {
         algorithm_name: result.algorithm_name,
       };
 
-      setResults([AlgorithmResult]); // Display the single result
+      setResults([AlgorithmResult]); 
       
     } catch (error: any) {
-      
+      // START STEP 3: Enhanced Error Parsing
       if (error.message.includes("API Error:") && error.message.includes("{")) {
-          // Check for structured validation errors (Step 3 will enhance this display)
           try {
+             // Attempt to parse structured error details from the backend
              const structuredError = JSON.parse(error.message.split("API Error: ")[1]);
              setBackendValidationErrors(structuredError);
              setApiError("Input validation failed. See specific errors below."); 
           } catch {
+             // Fallback for unparseable JSON error
              setApiError(error.message);
           }
       } else {
           setApiError(error.message || "An unknown error occurred during computation.");
       }
+      // END STEP 3: Enhanced Error Parsing
       
     } finally {
       setIsLoading(false);
     }
-  }, [projects, budget, selectedAlgorithm]); // Depend on state for memoization
+  }, [projects, budget, selectedAlgorithm]); 
+
+
+  // START STEP 3: CONSOLIDATED ERROR RENDERING PREP
+  const formattedValidationErrors = backendValidationErrors 
+      ? formatValidationErrors(backendValidationErrors) 
+      : [];
+  // END STEP 3: CONSOLIDATED ERROR RENDERING PREP
+
 
   return (
     <div className="container mx-auto p-6">
@@ -99,7 +123,6 @@ const SolverPage: React.FC = () => {
             projects={projects} 
             setProjects={setProjects} 
             backendErrors={backendValidationErrors} 
-            // STEP 2: Pass selected indices from the most recent result
             selectedIndices={results.length > 0 ? results[0].selected_indices : []}
           />
           
@@ -115,13 +138,20 @@ const SolverPage: React.FC = () => {
         <div className="lg:col-span-2 space-y-6 p-4 border rounded-lg bg-white shadow-md">
           <h2 className="text-2xl font-semibold border-b pb-2">Algorithm Results & Comparison</h2>
 
-          {/* Global API Error Display (omitted for brevity) */}
-          {apiError && (
+          {/* START STEP 3: Global API Error Display (Updated for formatted errors) */}
+          {(apiError || formattedValidationErrors.length > 0) && (
               <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                  <p className="font-bold">Error:</p>
-                  <p>{apiError}</p>
+                  <p className="font-bold">{apiError || 'API Error:'}</p>
+                  {formattedValidationErrors.length > 0 && (
+                      <ul className="list-disc list-inside mt-2 text-sm">
+                          {formattedValidationErrors.map((msg, index) => (
+                              <li key={index}>{msg}</li>
+                          ))}
+                      </ul>
+                  )}
               </div>
           )}
+          {/* END STEP 3: Global API Error Display */}
 
           {/* Result Display Area (omitted for brevity) */}
           {results.length > 0 ? (
