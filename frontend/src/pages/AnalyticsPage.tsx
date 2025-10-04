@@ -2,50 +2,27 @@
 import React, { useState, useEffect } from 'react';
 import ExecutionTimeChart from '../components/charts/ExecutionTimeChart';
 import MemoryUsageChart from '../components/charts/MemoryUsageChart';
-
-// --- MOCK API DATA AND FUNCTION ---
-// Simulates fetching benchmark data from the GET /benchmark/ endpoint
-interface BenchmarkResult {
-  input_size: number;
-  brute_force_time: number; 
-  dp_time: number;          
-  greedy_time: number;      
-  brute_force_mem: number;
-  dp_mem: number;
-  greedy_mem: number;
-}
-
-// Mock data demonstrating the different scalability profiles:
-// Brute Force: Time increases exponentially (O(2^N))
-// DP: Time increases polynomially (O(N*W)) and requires space
-// Greedy: Time increases minimally (O(N log N)) and requires minimal space
-const mockBenchmarkData: BenchmarkResult[] = [
-  { input_size: 10, brute_force_time: 0.1, dp_time: 1.5, greedy_time: 0.01, brute_force_mem: 0.5, dp_mem: 1.0, greedy_mem: 0.1 },
-  { input_size: 15, brute_force_time: 3.2, dp_time: 3.5, greedy_time: 0.05, brute_force_mem: 1.2, dp_mem: 2.5, greedy_mem: 0.1 },
-  { input_size: 20, brute_force_time: 100.0, dp_time: 5.0, greedy_time: 0.08, brute_force_mem: 2.0, dp_mem: 4.0, greedy_mem: 0.2 },
-  { input_size: 25, brute_force_time: 3000.0, dp_time: 7.5, greedy_time: 0.12, brute_force_mem: 4.0, dp_mem: 6.0, greedy_mem: 0.2 },
-  { input_size: 30, brute_force_time: 90000.0, dp_time: 10.0, greedy_time: 0.15, brute_force_mem: 8.0, dp_mem: 8.0, greedy_mem: 0.3 },
-];
-
-const mockFetchBenchmarks = (): Promise<BenchmarkResult[]> => {
-  return new Promise((resolve) => {
-    // Simulate API call to fetch analytics snapshots
-    setTimeout(() => resolve(mockBenchmarkData), 800);
-  });
-};
-// --- END MOCK ---
+// START STEP 4: Import mock functions and types from the new mock file
+// NOTE: If the path below fails, ensure the mocks.ts file is correctly saved in src/api/
+import type { BenchmarkResult } from '../api/mocks.ts';
+import { mockFetchBenchmarks } from '../api/mocks.ts';
+// END STEP 4
 
 const AnalyticsPage: React.FC = () => {
+  // START STEP 4: Use BenchmarkResult interface from the new module
   const [benchmarkData, setBenchmarkData] = useState<BenchmarkResult[]>([]);
+  // END STEP 4
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     setIsLoading(true);
     // In production, this would be an Axios call to the FastAPI GET /benchmark/ endpoint
-    mockFetchBenchmarks().then(data => {
+    // START STEP 4: Call the imported mock fetch function
+    mockFetchBenchmarks().then((data: BenchmarkResult[]) => { // <-- FIX: Added type annotation for 'data'
       setBenchmarkData(data);
       setIsLoading(false);
     });
+    // END STEP 4
   }, []);
 
   return (
@@ -66,7 +43,7 @@ const AnalyticsPage: React.FC = () => {
           {/* Execution Time Chart */}
           <div className="bg-white p-6 border rounded-lg shadow-md h-[400px]">
             {benchmarkData.length > 0 ? (
-              <ExecutionTimeChart data={benchmarkData} />
+              <ExecutionTimeChart data={benchmarkData} /> 
             ) : (
               <p className="text-center text-gray-500 pt-10">No execution time data available.</p>
             )}

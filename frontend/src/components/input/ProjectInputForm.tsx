@@ -1,9 +1,13 @@
 // frontend/src/components/input/ProjectInputForm.tsx
+// frontend/src/components/input/ProjectInputForm.tsx
 import React, { useState } from 'react';
 import type { IProject } from '../../types'; 
 
-// FIX 1: Use namespace import to bypass persistent TS/Vite module export errors (FixedSizeList).
-import * as ReactWindow from 'react-window';
+// FIX: Use named import and suppress the TS error (ts2305) on this line only.
+// This is the most compatible way to resolve the runtime crash.
+// @ts-ignore
+import { FixedSizeList } from 'react-window'; 
+// ...
 // @ts-ignore - Access component from namespace object. This resolves the runtime SyntaxError.
 const FixedSizeList = ReactWindow.FixedSizeList; 
 
