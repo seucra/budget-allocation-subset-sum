@@ -5,7 +5,7 @@ import ProjectInputForm from '../components/input/ProjectInputForm';
 import BudgetControl from '../components/input/BudgetControl';
 import AlgorithmSelector from '../components/input/AlgorithmSelector';
 import ResultCard from '../components/results/ResultCard';
-import { runSolver } from '../api/solver';
+import { runSolver } from '../api/solver'; // <-- USING REAL API
 
 // Initial state definitions
 const INITIAL_PROJECTS: IProject[] = [
@@ -57,22 +57,12 @@ const SolverPage: React.FC = () => {
     };
 
     try {
-      // FIXED: Use mock data for now since backend might not be running
-      // const result = await runSolver(request);
+      // ----------------------------------------------------
+      // FINAL IMPLEMENTATION: Call the real runSolver API endpoint
+      // ----------------------------------------------------
+      const result = await runSolver(request);
       
-      // Mock result for demonstration
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const mockResult: IAlgorithmResult = {
-        selected_indices: [0, 1, 3],
-        total_cost: projects[0].cost + projects[1].cost + projects[3].cost,
-        execution_time_ms: 45.67,
-        memory_used_mb: 1.2,
-        status: 'exact',
-        algorithm_name: selectedAlgorithm,
-      };
-
-      setResults([mockResult]); 
+      setResults([result]); 
       
     } catch (error: any) {
       console.error('Solver error:', error);
@@ -80,6 +70,7 @@ const SolverPage: React.FC = () => {
       // Enhanced Error Parsing
       if (error.message?.includes("API Error:") && error.message.includes("{")) {
           try {
+             // The error message from runSolver should contain the JSON body from FastAPI
              const structuredError = JSON.parse(error.message.split("API Error: ")[1]);
              setBackendValidationErrors(structuredError);
              setApiError("Input validation failed. See specific errors below."); 
