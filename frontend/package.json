@@ -6,7 +6,8 @@
     "dev": "vite",
     "build": "vite build", 
     "preview": "vite preview",
-    "start": "vite"
+    "start": "vite",
+    "dev:codespace": "VITE_API_HOST=$(gp url 8000) vite"
     
   },
   "dependencies": {

@@ -1,0 +1,18 @@
+# frontend/Dockerfile.frontend
+FROM node:20-alpine
+
+# Set the working directory to the container's root application folder
+WORKDIR /app
+
+# 1. Copy dependency files from the build context (which should be the frontend/ folder)
+COPY package.json package-lock.json ./
+RUN npm install
+
+# 2. Copy the rest of the application files (src, index.html, vite.config.js, etc.)
+COPY . .
+
+# Expose Vite's default development port
+EXPOSE 3000
+
+# Command to run the Vite dev server. 
+CMD ["npm", "run", "dev", "--", "--host"]
