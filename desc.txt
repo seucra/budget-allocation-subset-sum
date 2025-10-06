@@ -1,1 +1,0 @@
-A system to optimize project selection within budget constraints using multiple subset sum algorithms, featuring priority, risk adjustment, and visualization.
