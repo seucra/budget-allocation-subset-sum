@@ -45,7 +45,6 @@ target_link_libraries(solver PRIVATE solver_lib)
 target_include_directories(solver PUBLIC ${cxxopts_SOURCE_DIR}/include)
 
 # --- GUI Executable ---
-# --- GUI Executable ---
 add_executable(solver-gui
     src/main_gui.cpp
     src/GUI/MainWindow.cpp # <-- This line is critical
