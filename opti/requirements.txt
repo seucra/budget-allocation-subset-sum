@@ -1,0 +1,25 @@
+# Core API Framework and Server
+fastapi
+uvicorn[standard]
+
+# Database Access (PostgreSQL via SQLAlchemy)
+# 'psycopg2-binary' is used for standard blocking PostgreSQL access
+sqlalchemy
+psycopg2-binary
+
+# C++ Interoperability (Recommended binding tool)
+pybind11
+
+# Data Validation and Configuration
+# Pydantic is already a FastAPI dependency, but often listed for clarity.
+pydantic
+python-dotenv # For loading .env files (secrets/configuration)
+
+# Performance Monitoring & Profiling
+memory-profiler # For tracking memory usage
+psutil          # Utility often required for memory profiling
+matplotlib      # For generating plots and visualization data
+
+# Testing (Development Dependencies)
+pytest
+pytest-asyncio
